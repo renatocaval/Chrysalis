@@ -20,15 +20,16 @@ import ReactDOM from "react-dom";
 import Electron from "electron";
 import { SnackbarProvider } from "notistack";
 
-// Use this App file for the main Chrysalis app
-import App from "./App";
 import Error from "./Error";
-import "../styles/keymap.css";
+
+// Use this App file for the main Chrysalis app
+//import App from "./App";
+//import "../styles/keymap.css";
 
 // Use the following for the new UI mockup
-//import "../styles/reset.css";
-// import "./mockup/scss/app.scss";
-// import App from "./mockup/components/App";
+import "../styles/reset.css";
+import "./mockup/scss/app.scss";
+import App from "./mockup/components/App";
 
 try {
   ReactDOM.render(

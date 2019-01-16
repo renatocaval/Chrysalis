@@ -17,6 +17,7 @@
 
 import React from "react";
 import PropTypes from "prop-types";
+import fs from "fs";
 
 import Collapse from "@material-ui/core/Collapse";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
@@ -228,6 +229,21 @@ class LayoutEditor extends React.Component {
     });
   };
 
+  exportLayerSVG = () => {
+    let a = document.getElementsByClassName("layer")[0].cloneNode(true);
+    a.insertAdjacentHTML(
+      "afterbegin",
+      '<style type="text/css">.key,.extraKey{font-family:"Source Code Pro","monospace";font-size:10px;font-weight: 700;}.extraKey{font-size:8px;}</style>'
+    );
+    a.insertAdjacentHTML(
+      "afterbegin",
+      '<rect width="100%" height="100%" fill="#cccccc"/>'
+    );
+    fs.writeFile("/tmp/test.svg", a.outerHTML, err => {
+      if (err) console.log(err);
+    });
+  };
+
   render() {
     const { classes } = this.props;
     const {
@@ -322,6 +338,7 @@ class LayoutEditor extends React.Component {
             {copyMenuExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </MenuItem>
           <Collapse in={copyMenuExpanded}>{copyItems}</Collapse>
+          <MenuItem onClick={this.exportLayerSVG}>Export layer SVG...</MenuItem>
         </Menu>
       </React.Fragment>
     );

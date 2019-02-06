@@ -23,9 +23,15 @@
   font-family: "Source Code Pro", "monospace";
   font-size: 10px;
   font-weight: 700;
-  min-width: 550px;
-  min-height: 280px;
-  max-width: 85%;
+  position: absolute;
+  top: 136px;
+  bottom: 166px;
+  max-height: calc(100% - 318px);
+  max-width: calc(100% - 64px);
+  top: 152px;
+  bottom: 166px;
+  left: 32px;
+  right: 32px;
 }
 
 .extraKey {

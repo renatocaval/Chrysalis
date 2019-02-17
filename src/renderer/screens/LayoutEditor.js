@@ -508,12 +508,16 @@ class LayoutEditor extends React.Component {
             </FormControl>
             <div className={classes.grow} />
             <div>
-              <IconButton>
-                <FileCopyIcon />
-              </IconButton>
-              <IconButton>
-                <HighlightOffIcon />
-              </IconButton>
+              <Tooltip title="Copy layer from...">
+                <IconButton>
+                  <FileCopyIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Clear layer">
+                <IconButton>
+                  <HighlightOffIcon />
+                </IconButton>
+              </Tooltip>
             </div>
           </Toolbar>
         </Portal>

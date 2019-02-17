@@ -28,7 +28,9 @@ import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import IconButton from "@material-ui/core/IconButton";
 import KeyboardIcon from "@material-ui/icons/Keyboard";
 import LinearProgress from "@material-ui/core/LinearProgress";
-//import LockIcon from "@material-ui/icons/Lock";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemText from "@material-ui/core/ListItemText";
+import LockIcon from "@material-ui/icons/Lock";
 //import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 //import MoreVerticalIcon from "@material-ui/icons/MoreVert";
@@ -55,6 +57,9 @@ import settings from "electron-settings";
 const styles = theme => ({
   tbg: {
     marginRight: theme.spacing.unit * 4
+  },
+  layerSelectItem: {
+    display: "inline-flex"
   },
   grow: {
     flexGrow: 1
@@ -209,9 +214,10 @@ class LayoutEditor extends React.Component {
     });
   };
 
-  selectLayer = (event, value) => {
+  selectLayer = event => {
+    if (event.target.value === undefined) return;
     this.setState({
-      currentLayer: value,
+      currentLayer: event.target.value,
       currentKeyIndex: -1
     });
   };
@@ -436,7 +442,40 @@ class LayoutEditor extends React.Component {
         </Menu>
       </React.Fragment>
     );
-      */
+    */
+
+    const defaultLayerMenu =
+      showDefaults &&
+      keymap.default.map((_, index) => {
+        const idx = index - (keymap.onlyCustom ? keymap.default.length : 0),
+          menuKey = "layer-menu-" + idx.toString();
+        return (
+          <MenuItem value={idx} key={menuKey}>
+            <ListItemIcon>
+              <LockIcon />
+            </ListItemIcon>
+            <ListItemText
+              inset
+              primary={i18n.formatString(i18n.components.layer, idx)}
+            />
+          </MenuItem>
+        );
+      });
+
+    const customLayerMenu = keymap.custom.map((_, index) => {
+      const idx = index + (keymap.onlyCustom ? 0 : keymap.default.length),
+        menuKey = "layer-menu-" + idx.toString();
+      return (
+        <MenuItem value={idx} key={menuKey}>
+          <ListItemText
+            inset
+            primary={i18n.formatString(i18n.components.layer, idx)}
+          />
+        </MenuItem>
+      );
+    });
+
+    const layerMenu = (defaultLayerMenu || []).concat(customLayerMenu);
 
     return (
       <React.Fragment>
@@ -458,9 +497,13 @@ class LayoutEditor extends React.Component {
               </ToggleButton>
             </ToggleButtonGroup>
             <FormControl>
-              <Select value={0} autoWidth>
-                <MenuItem value={0}>Layer #0</MenuItem>
-                <MenuItem value={1}>Layer #1</MenuItem>
+              <Select
+                value={currentLayer}
+                classes={{ selectMenu: classes.layerSelectItem }}
+                autoWidth
+                onClick={this.selectLayer}
+              >
+                {layerMenu}
               </Select>
             </FormControl>
             <div className={classes.grow} />

@@ -18,21 +18,28 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import Collapse from "@material-ui/core/Collapse";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+//import Collapse from "@material-ui/core/Collapse";
+//import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+//import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Fade from "@material-ui/core/Fade";
+import FileCopyIcon from "@material-ui/icons/FileCopy";
+import FormControl from "@material-ui/core/FormControl";
+import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import IconButton from "@material-ui/core/IconButton";
+import KeyboardIcon from "@material-ui/icons/Keyboard";
 import LinearProgress from "@material-ui/core/LinearProgress";
-import LockIcon from "@material-ui/icons/Lock";
-import Menu from "@material-ui/core/Menu";
+//import LockIcon from "@material-ui/icons/Lock";
+//import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
-import MoreVerticalIcon from "@material-ui/icons/MoreVert";
+//import MoreVerticalIcon from "@material-ui/icons/MoreVert";
+import PaletteIcon from "@material-ui/icons/Palette";
 import Portal from "@material-ui/core/Portal";
+import Select from "@material-ui/core/Select";
 import Slide from "@material-ui/core/Slide";
-import Tab from "@material-ui/core/Tab";
-import Tabs from "@material-ui/core/Tabs";
+import ToggleButton from "@material-ui/lab/ToggleButton";
+import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import Toolbar from "@material-ui/core/Toolbar";
+import Tooltip from "@material-ui/core/Tooltip";
 import { withStyles } from "@material-ui/core/styles";
 
 import { withSnackbar } from "notistack";
@@ -46,8 +53,8 @@ import i18n from "../i18n";
 import settings from "electron-settings";
 
 const styles = theme => ({
-  tabs: {
-    flexGrow: 1
+  tbg: {
+    marginRight: theme.spacing.unit * 4
   },
   grow: {
     flexGrow: 1
@@ -88,7 +95,9 @@ class LayoutEditor extends React.Component {
       custom: [],
       default: [],
       onlyCustom: false
-    }
+    },
+    palette: [],
+    colorMap: []
   };
   keymapDB = new KeymapDB();
 
@@ -120,10 +129,14 @@ class LayoutEditor extends React.Component {
         await focus.command("keymap", keymap);
       }
 
+      let colormap = await focus.command("colormap");
+
       this.setState({
         defaultLayer: defLayer,
         keymap: keymap,
-        showDefaults: !keymap.onlyCustom
+        showDefaults: !keymap.onlyCustom,
+        palette: colormap.palette,
+        colorMap: colormap.colorMap
       });
     } catch (e) {
       this.props.enqueueSnackbar(e, { variant: "error" });
@@ -314,7 +327,7 @@ class LayoutEditor extends React.Component {
 
   render() {
     const { classes } = this.props;
-    const { moreAnchorEl, keymap } = this.state;
+    const { /*moreAnchorEl,*/ keymap } = this.state;
 
     let focus = new Focus();
     const Layer = focus.device.components.keymap;
@@ -350,59 +363,15 @@ class LayoutEditor extends React.Component {
             keymap={layerData}
             onKeySelect={this.onKeySelect}
             selectedKey={this.state.currentKeyIndex}
+            palette={this.state.palette}
+            colormap={this.state.colorMap[this.state.currentLayer]}
+            theme={this.props.theme}
           />
         </div>
       </Fade>
     );
 
-    const tabClasses = {
-      wrapper: classes.tabWrapper,
-      labelContainer: classes.tabLabelContainer
-    };
-
-    let defaultTabs =
-      showDefaults &&
-      keymap.default.map((_, index) => {
-        const idx = index - (keymap.onlyCustom ? keymap.default.length : 0),
-          tabKey = "tab-layer-" + idx.toString();
-
-        const label = (
-          <span> {i18n.formatString(i18n.components.layer, idx)} </span>
-        );
-        const icon = <LockIcon />;
-
-        return (
-          <Tab
-            label={label}
-            key={tabKey}
-            value={idx}
-            icon={icon}
-            classes={tabClasses}
-          />
-        );
-      });
-    let customTabs = keymap.custom.map((_, index) => {
-      const idx = index + (keymap.onlyCustom ? 0 : keymap.default.length);
-      const label = (
-          <span>{i18n.formatString(i18n.components.layer, idx)}</span>
-        ),
-        tabKey = "tab-layer-" + idx.toString();
-
-      const icon = <div />;
-
-      return (
-        <Tab
-          label={label}
-          key={tabKey}
-          value={idx}
-          icon={icon}
-          classes={tabClasses}
-        />
-      );
-    });
-
-    let tabs = (defaultTabs || []).concat(customTabs);
-
+    /*
     const copyCustomItems = this.state.keymap.custom.map((_, index) => {
       const idx = index + (keymap.onlyCustom ? 0 : keymap.default.length);
       const label = i18n.formatString(i18n.components.layer, idx),
@@ -467,24 +436,42 @@ class LayoutEditor extends React.Component {
         </Menu>
       </React.Fragment>
     );
+      */
 
     return (
       <React.Fragment>
         <Portal container={this.props.titleElement}>
-          {i18n.app.menu.layoutEditor}
+          Layout & colormap editor
         </Portal>
         <Portal container={this.props.appBarElement}>
           <Toolbar>
-            <Tabs
-              className={classes.tabs}
-              value={currentLayer}
-              variant={keymap.custom.length != 0 ? "scrollable" : "standard"}
-              scrollButtons="auto"
-              onChange={this.selectLayer}
-            >
-              {tabs}
-            </Tabs>
-            {moreMenu}
+            <ToggleButtonGroup value="layout" exclusive className={classes.tbg}>
+              <ToggleButton value="layout">
+                <Tooltip title="Edit the keyboard layout">
+                  <KeyboardIcon />
+                </Tooltip>
+              </ToggleButton>
+              <ToggleButton value="colormap">
+                <Tooltip title="Edit the colormap">
+                  <PaletteIcon />
+                </Tooltip>
+              </ToggleButton>
+            </ToggleButtonGroup>
+            <FormControl>
+              <Select value={0} autoWidth>
+                <MenuItem value={0}>Layer #0</MenuItem>
+                <MenuItem value={1}>Layer #1</MenuItem>
+              </Select>
+            </FormControl>
+            <div className={classes.grow} />
+            <div>
+              <IconButton>
+                <FileCopyIcon />
+              </IconButton>
+              <IconButton>
+                <HighlightOffIcon />
+              </IconButton>
+            </div>
           </Toolbar>
         </Portal>
         {this.state.keymap.custom.length == 0 && (
@@ -514,4 +501,6 @@ LayoutEditor.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withSnackbar(withStyles(styles)(LayoutEditor));
+export default withSnackbar(
+  withStyles(styles, { withTheme: true })(LayoutEditor)
+);

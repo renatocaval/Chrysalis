@@ -18,7 +18,12 @@
 import React from "react";
 import PropTypes from "prop-types";
 
+import Button from "@material-ui/core/Button";
 //import Collapse from "@material-ui/core/Collapse";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogTitle from "@material-ui/core/DialogTitle";
 //import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 //import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Fade from "@material-ui/core/Fade";
@@ -88,13 +93,34 @@ const styles = theme => ({
   }
 });
 
+const ConfirmationDialog = props => {
+  return (
+    <Dialog
+      disableBackdropClick
+      open={props.open}
+      onClose={props.onCancel}
+      fullWidth
+    >
+      <DialogTitle>{props.title}</DialogTitle>
+      <DialogContent>{props.children}</DialogContent>
+      <DialogActions>
+        <Button onClick={props.onCancel} color="primary">
+          Cancel
+        </Button>
+        <Button onClick={props.onConfirm} color="primary">
+          Ok
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
 class LayoutEditor extends React.Component {
   state = {
     currentLayer: 0,
     currentKeyIndex: -1,
     modified: false,
     saving: false,
-    moreAnchorEl: null,
     copyMenuExpanded: false,
     keymap: {
       custom: [],
@@ -102,7 +128,8 @@ class LayoutEditor extends React.Component {
       onlyCustom: false
     },
     palette: [],
-    colorMap: []
+    colorMap: [],
+    clearConfirmationOpen: false
   };
   keymapDB = new KeymapDB();
 
@@ -258,13 +285,6 @@ class LayoutEditor extends React.Component {
     }
   };
 
-  moreMenu = event => {
-    this.setState({ moreAnchorEl: event.currentTarget });
-  };
-  moreMenuClose = () => {
-    this.setState({ moreAnchorEl: null });
-  };
-
   copyFromLayerMenu = () => {
     this.setState(state => ({
       copyMenuExpanded: !state.copyMenuExpanded
@@ -303,7 +323,6 @@ class LayoutEditor extends React.Component {
           custom: newKeymap
         },
         copyMenuExpanded: false,
-        moreAnchorEl: null,
         modified: true
       };
     });
@@ -326,14 +345,21 @@ class LayoutEditor extends React.Component {
           custom: newKeymap
         },
         modified: true,
-        moreAnchorEl: null
+        clearConfirmationOpen: false
       };
     });
   };
 
+  confirmClear = () => {
+    this.setState({ clearConfirmationOpen: true });
+  };
+  cancelClear = () => {
+    this.setState({ clearConfirmationOpen: false });
+  };
+
   render() {
     const { classes } = this.props;
-    const { /*moreAnchorEl,*/ keymap } = this.state;
+    const { keymap, palette } = this.state;
 
     let focus = new Focus();
     const Layer = focus.device.components.keymap;
@@ -490,11 +516,13 @@ class LayoutEditor extends React.Component {
                   <KeyboardIcon />
                 </Tooltip>
               </ToggleButton>
-              <ToggleButton value="colormap">
-                <Tooltip title="Edit the colormap">
-                  <PaletteIcon />
-                </Tooltip>
-              </ToggleButton>
+              {palette.length && (
+                <ToggleButton value="colormap">
+                  <Tooltip title="Edit the colormap">
+                    <PaletteIcon />
+                  </Tooltip>
+                </ToggleButton>
+              )}
             </ToggleButtonGroup>
             <FormControl>
               <Select
@@ -509,12 +537,12 @@ class LayoutEditor extends React.Component {
             <div className={classes.grow} />
             <div>
               <Tooltip title="Copy layer from...">
-                <IconButton>
+                <IconButton disabled={isReadOnly}>
                   <FileCopyIcon />
                 </IconButton>
               </Tooltip>
               <Tooltip title="Clear layer">
-                <IconButton>
+                <IconButton disabled={isReadOnly} onClick={this.confirmClear}>
                   <HighlightOffIcon />
                 </IconButton>
               </Tooltip>
@@ -539,6 +567,14 @@ class LayoutEditor extends React.Component {
         >
           {i18n.components.save.saveChanges}
         </SaveChangesButton>
+        <ConfirmationDialog
+          title="Clear layer?"
+          open={this.state.clearConfirmationOpen}
+          onConfirm={this.clearLayer}
+          onCancel={this.cancelClear}
+        >
+          This will reset the layer to its default state.
+        </ConfirmationDialog>
       </React.Fragment>
     );
   }

@@ -337,6 +337,11 @@ class LayoutEditor extends React.Component {
       newKeymap[idx] = Array(newKeymap[0].length)
         .fill()
         .map(() => ({ keyCode: 0xffff }));
+
+      let newColormap = state.colorMap.slice();
+      newColormap[idx] = Array(newColormap[0].length)
+        .fill()
+        .map(() => 15);
       this.props.startContext();
       return {
         keymap: {
@@ -344,6 +349,7 @@ class LayoutEditor extends React.Component {
           onlyCustom: state.keymap.onlyCustom,
           custom: newKeymap
         },
+        colorMap: newColormap,
         modified: true,
         clearConfirmationOpen: false
       };

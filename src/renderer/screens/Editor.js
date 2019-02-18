@@ -282,12 +282,21 @@ class Editor extends React.Component {
       return;
     }
 
-    this.setState(state => ({
-      currentLayer: layer,
-      currentKeyIndex: keyIndex,
-      currentLedIndex: ledIndex,
-      selectedPaletteColor: state.colorMap[layer][ledIndex]
-    }));
+    this.setState(state => {
+      if (state.colorMap.length > 0) {
+        return {
+          currentLayer: layer,
+          currentKeyIndex: keyIndex,
+          currentLedIndex: ledIndex,
+          selectedPaletteColor: state.colorMap[layer][ledIndex]
+        };
+      } else {
+        return {
+          currentLayer: layer,
+          currentKeyIndex: keyIndex
+        };
+      }
+    });
   };
 
   selectLayer = event => {
@@ -365,7 +374,8 @@ class Editor extends React.Component {
             : state.keymap.custom[layer - state.keymap.default.length].slice();
       }
       newColormap = state.colorMap.slice();
-      newColormap[state.currentLayer] = state.colorMap[layer].slice();
+      if (newColormap.length > 0)
+        newColormap[state.currentLayer] = state.colorMap[layer].slice();
 
       this.props.startContext();
       return {
@@ -392,9 +402,11 @@ class Editor extends React.Component {
         .map(() => ({ keyCode: 0xffff }));
 
       let newColormap = state.colorMap.slice();
-      newColormap[idx] = Array(newColormap[0].length)
-        .fill()
-        .map(() => 15);
+      if (newColormap.length > 0) {
+        newColormap[idx] = Array(newColormap[0].length)
+          .fill()
+          .map(() => 15);
+      }
       this.props.startContext();
       return {
         keymap: {

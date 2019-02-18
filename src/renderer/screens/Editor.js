@@ -30,6 +30,8 @@ import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import IconButton from "@material-ui/core/IconButton";
 import KeyboardIcon from "@material-ui/icons/Keyboard";
 import LinearProgress from "@material-ui/core/LinearProgress";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import LockIcon from "@material-ui/icons/Lock";
@@ -42,6 +44,7 @@ import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import Toolbar from "@material-ui/core/Toolbar";
 import Tooltip from "@material-ui/core/Tooltip";
+import Typography from "@material-ui/core/Typography";
 import { withStyles } from "@material-ui/core/styles";
 
 import { withSnackbar } from "notistack";
@@ -123,20 +126,26 @@ const CopyFromDialog = props => {
     >
       <DialogTitle>{i18n.editor.copyFrom}</DialogTitle>
       <DialogContent>
-        <FormControl fullWidth>
-          <Select
-            value={selectedLayer}
-            onClick={event => {
-              if (event.target.value === undefined) return;
-              setSelectedLayer(event.target.value);
-            }}
-          >
-            <MenuItem value="prompt" disabled>
-              {i18n.editor.pleaseSelectLayer}
-            </MenuItem>
-            {props.layers}
-          </Select>
-        </FormControl>
+        <Typography variant="body1" gutterBottom>
+          {i18n.editor.pleaseSelectLayer}
+        </Typography>
+        <List>
+          {props.layers.map(layer => {
+            return (
+              <ListItem
+                key={layer.index}
+                button
+                disabled={layer.index == props.currentLayer}
+                selected={layer.index == selectedLayer}
+                onClick={() => {
+                  setSelectedLayer(layer.index);
+                }}
+              >
+                <ListItemText inset primary={layer.label} />
+              </ListItem>
+            );
+          })}
+        </List>
       </DialogContent>
       <DialogActions>
         <Button onClick={props.onCancel} color="primary">
@@ -517,27 +526,23 @@ class Editor extends React.Component {
 
     const copyCustomItems = this.state.keymap.custom.map((_, index) => {
       const idx = index + (keymap.onlyCustom ? 0 : keymap.default.length);
-      const label = i18n.formatString(i18n.components.layer, idx),
-        key = "copy-layer-" + idx.toString();
+      const label = i18n.formatString(i18n.components.layer, idx);
 
-      return (
-        <MenuItem key={key} disabled={idx == currentLayer} value={idx}>
-          {label}
-        </MenuItem>
-      );
+      return {
+        index: idx,
+        label: label
+      };
     });
     const copyDefaultItems =
       showDefaults &&
       keymap.default.map((_, index) => {
         const idx = index - (keymap.onlyCustom ? keymap.default.length : 0),
-          label = i18n.formatString(i18n.components.layer, idx),
-          key = "copy-layer-" + idx.toString();
+          label = i18n.formatString(i18n.components.layer, idx);
 
-        return (
-          <MenuItem key={key} value={idx}>
-            {label}
-          </MenuItem>
-        );
+        return {
+          index: idx,
+          label: label
+        };
       });
     const copyFromLayerOptions = (copyDefaultItems || []).concat(
       copyCustomItems
@@ -670,6 +675,7 @@ class Editor extends React.Component {
           onCopy={this.copyFromLayer}
           onCancel={this.cancelCopyFrom}
           layers={copyFromLayerOptions}
+          currentLayer={currentLayer}
         />
       </React.Fragment>
     );

@@ -101,10 +101,10 @@ const ConfirmationDialog = props => {
       <DialogContent>{props.children}</DialogContent>
       <DialogActions>
         <Button onClick={props.onCancel} color="primary">
-          Cancel
+          {i18n.dialog.cancel}
         </Button>
         <Button onClick={props.onConfirm} color="primary">
-          Ok
+          {i18n.dialog.ok}
         </Button>
       </DialogActions>
     </Dialog>
@@ -121,7 +121,7 @@ const CopyFromDialog = props => {
       onClose={props.onCancel}
       fullWidth
     >
-      <DialogTitle>Copy from layer...</DialogTitle>
+      <DialogTitle>{i18n.editor.copyFrom}</DialogTitle>
       <DialogContent>
         <FormControl fullWidth>
           <Select
@@ -132,7 +132,7 @@ const CopyFromDialog = props => {
             }}
           >
             <MenuItem value="prompt" disabled>
-              Please select a layer...
+              {i18n.editor.pleaseSelectLayer}
             </MenuItem>
             {props.layers}
           </Select>
@@ -140,7 +140,7 @@ const CopyFromDialog = props => {
       </DialogContent>
       <DialogActions>
         <Button onClick={props.onCancel} color="primary">
-          Cancel
+          {i18n.dialog.cancel}
         </Button>
         <Button
           onClick={() => {
@@ -149,7 +149,7 @@ const CopyFromDialog = props => {
           color="primary"
           disabled={selectedLayer == "prompt"}
         >
-          Copy
+          {i18n.dialog.ok}
         </Button>
       </DialogActions>
     </Dialog>
@@ -568,7 +568,7 @@ class Editor extends React.Component {
     return (
       <React.Fragment>
         <Portal container={this.props.titleElement}>
-          Layout & colormap editor
+          {i18n.app.menu.editor}
         </Portal>
         <Portal container={this.props.appBarElement}>
           <Toolbar>
@@ -581,13 +581,13 @@ class Editor extends React.Component {
               }}
             >
               <ToggleButton value="layout">
-                <Tooltip title="Edit the keyboard layout">
+                <Tooltip title={i18n.editor.layoutMode}>
                   <KeyboardIcon />
                 </Tooltip>
               </ToggleButton>
               {palette.length && (
                 <ToggleButton value="colormap">
-                  <Tooltip title="Edit the colormap">
+                  <Tooltip title={i18n.editor.colormapMode}>
                     <PaletteIcon />
                   </Tooltip>
                 </ToggleButton>
@@ -605,12 +605,12 @@ class Editor extends React.Component {
             </FormControl>
             <div className={classes.grow} />
             <div>
-              <Tooltip title="Copy layer from...">
+              <Tooltip title={i18n.editor.copyFrom}>
                 <IconButton disabled={isReadOnly} onClick={this.copyFromDialog}>
                   <FileCopyIcon />
                 </IconButton>
               </Tooltip>
-              <Tooltip title="Clear layer">
+              <Tooltip title={i18n.editor.clearLayer}>
                 <IconButton disabled={isReadOnly} onClick={this.confirmClear}>
                   <HighlightOffIcon />
                 </IconButton>
@@ -646,12 +646,12 @@ class Editor extends React.Component {
           {i18n.components.save.saveChanges}
         </SaveChangesButton>
         <ConfirmationDialog
-          title="Clear layer?"
+          title={i18n.editor.clearLayerQuestion}
           open={this.state.clearConfirmationOpen}
           onConfirm={this.clearLayer}
           onCancel={this.cancelClear}
         >
-          This will reset the layer to its default state.
+          {i18n.editor.clearLayerPrompt}
         </ConfirmationDialog>
         <CopyFromDialog
           open={this.state.copyFromOpen}

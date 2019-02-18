@@ -15,17 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 
 import Button from "@material-ui/core/Button";
-//import Collapse from "@material-ui/core/Collapse";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
-//import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-//import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Fade from "@material-ui/core/Fade";
 import FileCopyIcon from "@material-ui/icons/FileCopy";
 import FormControl from "@material-ui/core/FormControl";
@@ -36,9 +33,7 @@ import LinearProgress from "@material-ui/core/LinearProgress";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import LockIcon from "@material-ui/icons/Lock";
-//import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
-//import MoreVerticalIcon from "@material-ui/icons/MoreVert";
 import PaletteIcon from "@material-ui/icons/Palette";
 import Portal from "@material-ui/core/Portal";
 import Select from "@material-ui/core/Select";
@@ -115,13 +110,57 @@ const ConfirmationDialog = props => {
   );
 };
 
+const CopyFromDialog = props => {
+  const [selectedLayer, setSelectedLayer] = useState("prompt");
+
+  return (
+    <Dialog
+      disableBackdropClick
+      open={props.open}
+      onClose={props.onCancel}
+      fullWidth
+    >
+      <DialogTitle>Copy from layer...</DialogTitle>
+      <DialogContent>
+        <FormControl fullWidth>
+          <Select
+            value={selectedLayer}
+            onClick={event => {
+              if (event.target.value === undefined) return;
+              setSelectedLayer(event.target.value);
+            }}
+          >
+            <MenuItem value="prompt" disabled>
+              Please select a layer...
+            </MenuItem>
+            {props.layers}
+          </Select>
+        </FormControl>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={props.onCancel} color="primary">
+          Cancel
+        </Button>
+        <Button
+          onClick={() => {
+            props.onCopy(selectedLayer);
+          }}
+          color="primary"
+          disabled={selectedLayer == "prompt"}
+        >
+          Copy
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
 class Editor extends React.Component {
   state = {
     currentLayer: 0,
     currentKeyIndex: -1,
     modified: false,
     saving: false,
-    copyMenuExpanded: false,
     keymap: {
       custom: [],
       default: [],
@@ -129,7 +168,8 @@ class Editor extends React.Component {
     },
     palette: [],
     colorMap: [],
-    clearConfirmationOpen: false
+    clearConfirmationOpen: false,
+    copyFromOpen: false
   };
   keymapDB = new KeymapDB();
 
@@ -285,15 +325,15 @@ class Editor extends React.Component {
     }
   };
 
-  copyFromLayerMenu = () => {
-    this.setState(state => ({
-      copyMenuExpanded: !state.copyMenuExpanded
-    }));
+  copyFromDialog = () => {
+    this.setState({ copyFromOpen: true });
   };
-
+  cancelCopyFrom = () => {
+    this.setState({ copyFromOpen: false });
+  };
   copyFromLayer = layer => {
     this.setState(state => {
-      let newKeymap;
+      let newKeymap, newColormap;
 
       if (state.keymap.onlyCustom) {
         newKeymap =
@@ -314,15 +354,18 @@ class Editor extends React.Component {
             ? state.keymap.default[layer].slice()
             : state.keymap.custom[layer - state.keymap.default.length].slice();
       }
+      newColormap = state.colorMap.slice();
+      newColormap[state.currentLayer] = state.colorMap[layer].slice();
 
       this.props.startContext();
       return {
+        colorMap: newColormap,
         keymap: {
           default: state.keymap.default,
           onlyCustom: state.keymap.onlyCustom,
           custom: newKeymap
         },
-        copyMenuExpanded: false,
+        copyFromOpen: false,
         modified: true
       };
     });
@@ -409,19 +452,13 @@ class Editor extends React.Component {
       </Fade>
     );
 
-    /*
     const copyCustomItems = this.state.keymap.custom.map((_, index) => {
       const idx = index + (keymap.onlyCustom ? 0 : keymap.default.length);
       const label = i18n.formatString(i18n.components.layer, idx),
         key = "copy-layer-" + idx.toString();
 
       return (
-        <MenuItem
-          className={classes.layerItem}
-          key={key}
-          disabled={idx == currentLayer}
-          onClick={() => this.copyFromLayer(idx)}
-        >
+        <MenuItem key={key} disabled={idx == currentLayer} value={idx}>
           {label}
         </MenuItem>
       );
@@ -434,47 +471,14 @@ class Editor extends React.Component {
           key = "copy-layer-" + idx.toString();
 
         return (
-          <MenuItem
-            className={classes.layerItem}
-            key={key}
-            onClick={() => this.copyFromLayer(idx)}
-          >
+          <MenuItem key={key} value={idx}>
             {label}
           </MenuItem>
         );
       });
-    const copyItems = (copyDefaultItems || []).concat(copyCustomItems);
-
-    const copyMenuExpanded =
-      this.state.copyMenuExpanded && this.state.currentLayer >= 0;
-
-    const moreMenu = (
-      <React.Fragment>
-        <IconButton onClick={this.moreMenu}>
-          <MoreVerticalIcon />
-        </IconButton>
-        <Menu
-          anchorEl={moreAnchorEl}
-          open={Boolean(moreAnchorEl)}
-          onClose={this.moreMenuClose}
-        >
-          <MenuItem onClick={this.clearLayer} disabled={currentLayer < 0}>
-            {i18n.layoutEditor.clearLayer}
-          </MenuItem>
-          <MenuItem
-            onClick={this.copyFromLayerMenu}
-            disabled={currentLayer < 0}
-          >
-            <span style={{ marginRight: "1em" }}>
-              {i18n.layoutEditor.copyFrom}
-            </span>
-            {copyMenuExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-          </MenuItem>
-          <Collapse in={copyMenuExpanded}>{copyItems}</Collapse>
-        </Menu>
-      </React.Fragment>
+    const copyFromLayerOptions = (copyDefaultItems || []).concat(
+      copyCustomItems
     );
-    */
 
     const defaultLayerMenu =
       showDefaults &&
@@ -543,7 +547,7 @@ class Editor extends React.Component {
             <div className={classes.grow} />
             <div>
               <Tooltip title="Copy layer from...">
-                <IconButton disabled={isReadOnly}>
+                <IconButton disabled={isReadOnly} onClick={this.copyFromDialog}>
                   <FileCopyIcon />
                 </IconButton>
               </Tooltip>
@@ -581,6 +585,12 @@ class Editor extends React.Component {
         >
           This will reset the layer to its default state.
         </ConfirmationDialog>
+        <CopyFromDialog
+          open={this.state.copyFromOpen}
+          onCopy={this.copyFromLayer}
+          onCancel={this.cancelCopyFrom}
+          layers={copyFromLayerOptions}
+        />
       </React.Fragment>
     );
   }

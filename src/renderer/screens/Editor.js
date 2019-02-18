@@ -160,6 +160,7 @@ class Editor extends React.Component {
   state = {
     currentLayer: 0,
     currentKeyIndex: -1,
+    currentLedIndex: -1,
     modified: false,
     saving: false,
     keymap: {
@@ -270,17 +271,23 @@ class Editor extends React.Component {
 
   onKeySelect = event => {
     let layer = parseInt(event.currentTarget.getAttribute("data-layer")),
-      keyIndex = parseInt(event.currentTarget.getAttribute("data-key-index"));
+      keyIndex = parseInt(event.currentTarget.getAttribute("data-key-index")),
+      ledIndex = parseInt(event.currentTarget.getAttribute("data-led-index"));
 
     if (keyIndex == this.state.currentKeyIndex) {
-      this.setState({ currentKeyIndex: -1 });
+      this.setState({
+        currentKeyIndex: -1,
+        currentLedIndex: -1
+      });
       return;
     }
 
-    this.setState({
+    this.setState(state => ({
       currentLayer: layer,
-      currentKeyIndex: keyIndex
-    });
+      currentKeyIndex: keyIndex,
+      currentLedIndex: ledIndex,
+      selectedPaletteColor: state.colorMap[layer][ledIndex]
+    }));
   };
 
   selectLayer = event => {
@@ -411,6 +418,43 @@ class Editor extends React.Component {
 
   setMode = mode => {
     this.setState({ mode: mode });
+  };
+
+  onColorSelect = colorIndex => {
+    if (colorIndex == this.state.selectedPaletteColor) colorIndex = -1;
+
+    if (colorIndex == -1) {
+      this.setState({ selectedPaletteColor: colorIndex });
+      return;
+    }
+
+    this.setState(state => {
+      let colormap = state.colorMap.slice();
+      const { currentLayer, currentLedIndex } = this.state;
+      colormap[currentLayer][currentLedIndex] = colorIndex;
+
+      return {
+        colorMap: colormap,
+        selectedPaletteColor: colorIndex,
+        modified: true
+      };
+    });
+    this.props.startContext();
+  };
+
+  onColorPick = (colorIndex, r, g, b) => {
+    let newPalette = this.state.palette.slice();
+    newPalette[colorIndex] = {
+      r: r,
+      g: g,
+      b: b,
+      rgb: `rgb(${r}, ${g}, ${b})`
+    };
+    this.setState({
+      palette: newPalette,
+      modified: true
+    });
+    this.props.startContext();
   };
 
   render() {

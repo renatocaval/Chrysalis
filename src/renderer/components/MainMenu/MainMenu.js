@@ -34,7 +34,6 @@ import i18n from "../../i18n";
 import { version } from "../../../../package.json";
 import WelcomeMenu from "./WelcomeMenu";
 import EditorMenuItem from "./EditorMenuItem";
-import ColormapMenuItem from "./ColormapMenuItem";
 import FlashMenuItem from "./FlashMenuItem";
 import ChatMenuItem from "./ChatMenuItem";
 import FeedbackMenuItem from "./FeedbackMenuItem";
@@ -118,15 +117,6 @@ function MainMenu({ open, closeMenu, classes, connected, pages }) {
                   selected={currentPage == "/editor"}
                   className={classes.menuItem}
                   onClick={() => setCurrentPage("/editor")}
-                />
-              </Link>
-            )}
-            {pages.colormap && (
-              <Link to="/colormap-editor" className={classes.link}>
-                <ColormapMenuItem
-                  selected={currentPage == "/colormap-editor"}
-                  className={classes.menuItem}
-                  onClick={() => setCurrentPage("/colormap-editor")}
                 />
               </Link>
             )}

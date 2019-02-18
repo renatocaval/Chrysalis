@@ -49,6 +49,7 @@ import { withSnackbar } from "notistack";
 import Focus from "@chrysalis-api/focus";
 import { KeymapDB } from "@chrysalis-api/keymap";
 
+import Palette from "./Editor/Palette";
 import KeySelector from "./Editor/KeySelector";
 import SaveChangesButton from "../components/SaveChangesButton";
 import i18n from "../i18n";
@@ -168,6 +169,7 @@ class Editor extends React.Component {
     },
     palette: [],
     colorMap: [],
+    mode: "layout",
     clearConfirmationOpen: false,
     copyFromOpen: false
   };
@@ -407,6 +409,10 @@ class Editor extends React.Component {
     this.setState({ clearConfirmationOpen: false });
   };
 
+  setMode = mode => {
+    this.setState({ mode: mode });
+  };
+
   render() {
     const { classes } = this.props;
     const { keymap, palette } = this.state;
@@ -513,6 +519,7 @@ class Editor extends React.Component {
     });
 
     const layerMenu = (defaultLayerMenu || []).concat(customLayerMenu);
+    const { mode } = this.state;
 
     return (
       <React.Fragment>
@@ -521,7 +528,14 @@ class Editor extends React.Component {
         </Portal>
         <Portal container={this.props.appBarElement}>
           <Toolbar>
-            <ToggleButtonGroup value="layout" exclusive className={classes.tbg}>
+            <ToggleButtonGroup
+              value={mode}
+              exclusive
+              className={classes.tbg}
+              onChange={(_, mode) => {
+                this.setMode(mode);
+              }}
+            >
               <ToggleButton value="layout">
                 <Tooltip title="Edit the keyboard layout">
                   <KeyboardIcon />
@@ -565,11 +579,20 @@ class Editor extends React.Component {
         )}
         {layer}
         <Slide in={this.getCurrentKey() != -1} direction="up" unmountOnExit>
-          <KeySelector
-            disabled={isReadOnly}
-            onKeySelect={this.onKeyChange}
-            currentKeyCode={this.getCurrentKey()}
-          />
+          {mode == "layout" ? (
+            <KeySelector
+              disabled={isReadOnly}
+              onKeySelect={this.onKeyChange}
+              currentKeyCode={this.getCurrentKey()}
+            />
+          ) : (
+            <Palette
+              palette={this.state.palette}
+              onColorSelect={this.onColorSelect}
+              onColorPick={this.onColorPick}
+              selected={this.state.selectedPaletteColor}
+            />
+          )}
         </Slide>
         <SaveChangesButton
           floating

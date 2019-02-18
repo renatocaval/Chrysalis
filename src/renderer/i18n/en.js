@@ -31,6 +31,7 @@ const English = {
     device: "Keyboard",
     menu: {
       welcome: "Welcome",
+      editor: "Layout & Colormap Editor",
       layoutEditor: "Layout Editor",
       colormapEditor: "Colormap Editor",
       firmwareUpdate: "Firmware Update",

@@ -54,7 +54,7 @@ import { withSnackbar } from "notistack";
 import Focus from "@chrysalis-api/focus";
 import { KeymapDB } from "@chrysalis-api/keymap";
 
-import KeySelector from "./LayoutEditor/KeySelector";
+import KeySelector from "./Editor/KeySelector";
 import SaveChangesButton from "../components/SaveChangesButton";
 import i18n from "../i18n";
 import settings from "electron-settings";
@@ -115,7 +115,7 @@ const ConfirmationDialog = props => {
   );
 };
 
-class LayoutEditor extends React.Component {
+class Editor extends React.Component {
   state = {
     currentLayer: 0,
     currentKeyIndex: -1,
@@ -586,10 +586,8 @@ class LayoutEditor extends React.Component {
   }
 }
 
-LayoutEditor.propTypes = {
+Editor.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withSnackbar(
-  withStyles(styles, { withTheme: true })(LayoutEditor)
-);
+export default withSnackbar(withStyles(styles, { withTheme: true })(Editor));

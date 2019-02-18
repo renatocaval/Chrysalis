@@ -605,13 +605,13 @@ class Editor extends React.Component {
                 this.setMode(mode);
               }}
             >
-              <ToggleButton value="layout">
+              <ToggleButton value="layout" disabled={mode == "layout"}>
                 <Tooltip title={i18n.editor.layoutMode}>
                   <KeyboardIcon />
                 </Tooltip>
               </ToggleButton>
               {palette.length && (
-                <ToggleButton value="colormap">
+                <ToggleButton value="colormap" disabled={mode == "colormap"}>
                   <Tooltip title={i18n.editor.colormapMode}>
                     <PaletteIcon />
                   </Tooltip>
@@ -648,20 +648,21 @@ class Editor extends React.Component {
         )}
         {layer}
         <Slide in={this.getCurrentKey() != -1} direction="up" unmountOnExit>
-          {mode == "layout" ? (
+          {(mode == "layout" && (
             <KeySelector
               disabled={isReadOnly}
               onKeySelect={this.onKeyChange}
               currentKeyCode={this.getCurrentKey()}
             />
-          ) : (
-            <Palette
-              palette={this.state.palette}
-              onColorSelect={this.onColorSelect}
-              onColorPick={this.onColorPick}
-              selected={this.state.selectedPaletteColor}
-            />
-          )}
+          )) ||
+            (mode == "colormap" && (
+              <Palette
+                palette={this.state.palette}
+                onColorSelect={this.onColorSelect}
+                onColorPick={this.onColorPick}
+                selected={this.state.selectedPaletteColor}
+              />
+            ))}
         </Slide>
         <SaveChangesButton
           floating

@@ -293,11 +293,12 @@ class Editor extends React.Component {
     this.setState({ saving: true });
     let focus = new Focus();
     await focus.command("keymap", this.state.keymap);
+    await focus.command("colormap", this.state.palette, this.state.colorMap);
     this.setState({
       modified: false,
       saving: false
     });
-    console.log("keymap updated");
+    console.log("Changes saved.");
     this.props.cancelContext();
   };
 

@@ -115,7 +115,7 @@ const ConfirmationDialog = props => {
 };
 
 const CopyFromDialog = props => {
-  const [selectedLayer, setSelectedLayer] = useState("prompt");
+  const [selectedLayer, setSelectedLayer] = useState(-1);
 
   return (
     <Dialog
@@ -148,15 +148,23 @@ const CopyFromDialog = props => {
         </List>
       </DialogContent>
       <DialogActions>
-        <Button onClick={props.onCancel} color="primary">
+        <Button
+          color="primary"
+          onClick={() => {
+            setSelectedLayer(-1);
+            props.onCancel();
+          }}
+        >
           {i18n.dialog.cancel}
         </Button>
         <Button
           onClick={() => {
-            props.onCopy(selectedLayer);
+            const layer = selectedLayer;
+            setSelectedLayer(-1);
+            props.onCopy(layer);
           }}
           color="primary"
-          disabled={selectedLayer == "prompt"}
+          disabled={selectedLayer == -1}
         >
           {i18n.dialog.ok}
         </Button>
